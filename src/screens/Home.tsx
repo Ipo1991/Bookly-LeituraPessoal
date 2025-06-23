@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Modal, Platform, Alert } from 'react-native';
-import { Card, Title, Paragraph, IconButton, Button, TextInput, Text, useTheme } from 'react-native-paper';
+import { View, StyleSheet, FlatList, Modal, Platform } from 'react-native';
+import { Card, Title, Paragraph, IconButton, Button, TextInput, Text, useTheme, Snackbar } from 'react-native-paper';
 import { useLeitura } from '../contexts/LeituraContext';
 import CircularProgress from '../components/CircularProgress';
 
@@ -11,6 +11,7 @@ export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLivro, setSelectedLivro] = useState<any>(null);
   const [novoProgresso, setNovoProgresso] = useState('');
+  const [erro, setErro] = useState('');
 
   const abrirModalProgresso = (livro: any) => {
     setSelectedLivro(livro);
@@ -23,15 +24,15 @@ export default function Home() {
       let progressoNum = Number(novoProgresso);
 
       if (isNaN(progressoNum)) {
-        Alert.alert('Erro', 'Digite um número válido!');
+        setErro('Digite um número válido!');
         return;
       }
       if (progressoNum < 0) {
-        Alert.alert('Erro', 'O número de páginas não pode ser negativo!');
+        setErro('O número de páginas não pode ser negativo!');
         return;
       }
       if (progressoNum > selectedLivro.totalPaginas) {
-        Alert.alert('Erro', `O valor não pode ser maior que o total de páginas (${selectedLivro.totalPaginas})!`);
+        setErro(`O valor não pode ser maior que o total de páginas (${selectedLivro.totalPaginas})!`);
         return;
       }
 
@@ -48,14 +49,7 @@ export default function Home() {
         excluirLivro(livroId);
       }
     } else {
-      Alert.alert(
-        'Excluir livro',
-        `Tem certeza que deseja excluir "${titulo}"?`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Excluir', style: 'destructive', onPress: () => excluirLivro(livroId) },
-        ]
-      );
+      excluirLivro(livroId);
     }
   };
 
@@ -265,6 +259,14 @@ export default function Home() {
           </View>
         </View>
       </Modal>
+      <Snackbar
+        visible={!!erro}
+        onDismiss={() => setErro('')}
+        duration={3000}
+        style={{ backgroundColor: theme.colors.error }}
+      >
+        {erro}
+      </Snackbar>
     </View>
   );
 }
